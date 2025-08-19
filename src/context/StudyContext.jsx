@@ -131,30 +131,31 @@ function studyReducer(state, action) {
   switch (action.type) {
     case 'LOAD_PROGRESS':
       return { ...state, ...action.payload };
-    
+
     case 'UPDATE_USER_PROFILE':
       return {
         ...state,
         user: { ...state.user, ...action.payload }
       };
-      
+
     case 'ANSWER_QUESTION':
       const { questionId, isCorrect, sectionId, timeSpent } = action.payload;
       const newAnswered = [...state.progress.questionsAnswered, questionId];
-      const newCorrect = isCorrect ? 
-        [...state.progress.correctAnswers, questionId] : 
-        state.progress.correctAnswers;
+      const newCorrect = isCorrect 
+        ? [...state.progress.correctAnswers, questionId] 
+        : state.progress.correctAnswers;
       const newStreak = isCorrect ? state.progress.streaks.current + 1 : 0;
+
       let xpGained = 0;
       let newAchievements = [...state.achievements];
-      
+
       // XP calculation
       if (isCorrect) {
         xpGained = 5; // Base XP for correct answer
         if (newStreak >= 5) xpGained += 2; // Streak bonus
         if (timeSpent && timeSpent < 10) xpGained += 3; // Speed bonus
       }
-      
+
       // Check for achievements
       const checkAchievement = (achievementId) => {
         if (!state.achievements.includes(achievementId)) {
@@ -164,19 +165,18 @@ function studyReducer(state, action) {
         }
         return false;
       };
-      
+
       if (isCorrect && state.progress.correctAnswers.length === 0) {
         checkAchievement('FIRST_CORRECT');
       }
-      
       if (newStreak === 5) checkAchievement('FIVE_STREAK');
       if (newStreak === 10) checkAchievement('TEN_STREAK');
       if (newAnswered.length === 100) checkAchievement('KNOWLEDGE_SEEKER');
-      
+
       const newXP = state.user.xp + xpGained;
       const newLevel = getLevel(newXP);
       const leveledUp = newLevel > state.user.level;
-      
+
       return {
         ...state,
         user: {
@@ -199,7 +199,7 @@ function studyReducer(state, action) {
         leveledUp,
         xpGained
       };
-      
+
     case 'COMPLETE_SECTION':
       return {
         ...state,
@@ -208,26 +208,25 @@ function studyReducer(state, action) {
           sectionsCompleted: [...state.progress.sectionsCompleted, action.payload]
         }
       };
-      
+
     case 'ADD_STUDY_TIME':
       const studyHour = new Date().getHours();
       let timeAchievements = [...state.achievements];
       let timeXP = 0;
-      
+
       if (studyHour >= 22 || studyHour <= 2) {
         if (!timeAchievements.includes('NIGHT_OWL')) {
           timeAchievements.push('NIGHT_OWL');
           timeXP += ACHIEVEMENTS.NIGHT_OWL.xp;
         }
       }
-      
       if (studyHour >= 5 && studyHour <= 7) {
         if (!timeAchievements.includes('EARLY_BIRD')) {
           timeAchievements.push('EARLY_BIRD');
           timeXP += ACHIEVEMENTS.EARLY_BIRD.xp;
         }
       }
-      
+
       return {
         ...state,
         user: {
@@ -240,26 +239,26 @@ function studyReducer(state, action) {
         },
         achievements: timeAchievements
       };
-      
+
     case 'SAVE_QUIZ_RESULT':
       const quizResult = action.payload;
       let quizXP = Math.floor(quizResult.percentage / 10) * 5; // 5 XP per 10%
       let quizAchievements = [...state.achievements];
-      
+
       if (quizResult.percentage === 100) {
         if (!quizAchievements.includes('QUIZ_PERFECTIONIST')) {
           quizAchievements.push('QUIZ_PERFECTIONIST');
           quizXP += ACHIEVEMENTS.QUIZ_PERFECTIONIST.xp;
         }
       }
-      
+
       if (quizResult.timeElapsed < 300) { // 5 minutes
         if (!quizAchievements.includes('SPEED_DEMON')) {
           quizAchievements.push('SPEED_DEMON');
           quizXP += ACHIEVEMENTS.SPEED_DEMON.xp;
         }
       }
-      
+
       return {
         ...state,
         user: {
@@ -269,41 +268,47 @@ function studyReducer(state, action) {
         quizResults: [...state.quizResults, quizResult],
         achievements: quizAchievements
       };
-      
+
+    case 'SAVE_EXAM_RESULT':
+      return {
+        ...state,
+        examResults: [...(state.examResults || []), action.payload]
+      };
+
     case 'ADD_CHALLENGE':
       return {
         ...state,
         challenges: [...state.challenges, action.payload]
       };
-      
+
     case 'COMPLETE_CHALLENGE':
       const challenge = state.challenges.find(c => c.id === action.payload);
       const challengeXP = challenge ? challenge.xp : 0;
-      
+
       return {
         ...state,
         user: {
           ...state.user,
           xp: state.user.xp + challengeXP
         },
-        challenges: state.challenges.map(c => 
+        challenges: state.challenges.map(c =>
           c.id === action.payload ? { ...c, completed: true } : c
         )
       };
-      
+
     case 'UPDATE_PREFERENCES':
       return {
         ...state,
         preferences: { ...state.preferences, ...action.payload }
       };
-      
+
     case 'CLEAR_NOTIFICATIONS':
       return {
         ...state,
         leveledUp: false,
         xpGained: 0
       };
-      
+
     default:
       return state;
   }
@@ -311,23 +316,26 @@ function studyReducer(state, action) {
 
 export function StudyProvider({ children }) {
   const [state, dispatch] = useReducer(studyReducer, initialState);
-  
+
   useEffect(() => {
-    const savedState = localStorage.getItem('ultrasound-study-progress');
+    const savedState = localStorage.getItem('sonography-school-2025-spi-progress');
     if (savedState) {
-      dispatch({
-        type: 'LOAD_PROGRESS',
-        payload: JSON.parse(savedState)
-      });
+      dispatch({ type: 'LOAD_PROGRESS', payload: JSON.parse(savedState) });
     }
   }, []);
-  
+
   useEffect(() => {
-    localStorage.setItem('ultrasound-study-progress', JSON.stringify(state));
+    localStorage.setItem('sonography-school-2025-spi-progress', JSON.stringify(state));
   }, [state]);
-  
+
   return (
-    <StudyContext.Provider value={{ state, dispatch, ACHIEVEMENTS, getLevel, getXPForNextLevel }}>
+    <StudyContext.Provider value={{
+      state,
+      dispatch,
+      ACHIEVEMENTS,
+      getLevel,
+      getXPForNextLevel
+    }}>
       {children}
     </StudyContext.Provider>
   );

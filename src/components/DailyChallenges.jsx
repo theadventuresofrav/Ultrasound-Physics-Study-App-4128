@@ -53,7 +53,7 @@ function DailyChallenges() {
   useEffect(() => {
     // Generate daily challenges if not already present
     const today = new Date().toDateString();
-    const existingChallenges = state.challenges.filter(c => 
+    const existingChallenges = state.challenges.filter(c =>
       new Date(c.date).toDateString() === today
     );
 
@@ -74,61 +74,19 @@ function DailyChallenges() {
     }
   }, [state.challenges, dispatch]);
 
-  const todayChallenges = state.challenges.filter(c => 
+  const todayChallenges = state.challenges.filter(c =>
     new Date(c.date).toDateString() === new Date().toDateString()
   );
-
-  const updateChallengeProgress = (challengeId, progress) => {
-    const challenge = todayChallenges.find(c => c.id === challengeId);
-    if (challenge && progress >= challenge.target && !challenge.completed) {
-      dispatch({ type: 'COMPLETE_CHALLENGE', payload: challengeId });
-    }
-  };
-
-  // Update challenge progress based on user activity
-  useEffect(() => {
-    todayChallenges.forEach(challenge => {
-      let currentProgress = 0;
-      
-      switch (challenge.type) {
-        case 'correct_answers':
-          currentProgress = state.progress.correctAnswers.length;
-          break;
-        case 'section_complete':
-          const today = new Date().toDateString();
-          const todayAnswers = state.progress.questionsAnswered.filter(id => {
-            // This is simplified - in a real app, you'd track timestamps
-            return true; // Placeholder logic
-          });
-          currentProgress = todayAnswers.length >= 5 ? 1 : 0;
-          break;
-        case 'speed_challenge':
-          // This would need additional tracking of question times
-          currentProgress = 0;
-          break;
-        case 'accuracy_challenge':
-          const recent20 = state.progress.questionsAnswered.slice(-20);
-          const recent20Correct = state.progress.correctAnswers.filter(id => 
-            recent20.includes(id)
-          );
-          const accuracy = recent20.length > 0 ? (recent20Correct.length / recent20.length) * 100 : 0;
-          currentProgress = accuracy >= challenge.accuracy ? recent20.length : 0;
-          break;
-      }
-      
-      updateChallengeProgress(challenge.id, currentProgress);
-    });
-  }, [state.progress, todayChallenges]);
 
   if (todayChallenges.length === 0) {
     return null;
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200">
+    <div className="dark-card rounded-2xl p-6 border border-primary-500/30 shadow-lg">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-medical-900">Daily Challenges</h2>
-        <div className="text-sm text-medical-600">
+        <h2 className="text-2xl font-bold text-slate-200">Daily Challenges</h2>
+        <div className="text-sm text-slate-400">
           {todayChallenges.filter(c => c.completed).length}/{todayChallenges.length} Complete
         </div>
       </div>
@@ -143,15 +101,15 @@ function DailyChallenges() {
               whileHover={{ scale: 1.02 }}
               className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                 challenge.completed
-                  ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50'
-                  : 'border-medical-200 bg-white hover:border-primary-300'
+                  ? 'border-green-500/30 bg-green-500/10 shadow-lg shadow-green-500/20'
+                  : 'border-dark-600 bg-dark-800/30 hover:border-primary-500/30'
               }`}
             >
               <div className="flex items-center space-x-4">
                 <div className={`p-3 rounded-lg ${
-                  challenge.completed 
-                    ? 'bg-green-100 text-green-600' 
-                    : 'bg-primary-100 text-primary-600'
+                  challenge.completed
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
                 }`}>
                   {challenge.completed ? (
                     <SafeIcon icon={FiCheck} className="text-xl" />
@@ -162,31 +120,29 @@ function DailyChallenges() {
                 
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-medical-900">{challenge.title}</h3>
-                    <span className={`text-sm px-2 py-1 rounded-full ${
+                    <h3 className="font-bold text-slate-200">{challenge.title}</h3>
+                    <span className={`text-sm px-2 py-1 rounded-full border ${
                       challenge.completed
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-primary-100 text-primary-700'
+                        ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                        : 'bg-primary-500/20 text-primary-400 border-primary-500/30'
                     }`}>
                       +{challenge.xp} XP
                     </span>
                   </div>
                   
-                  <p className="text-sm text-medical-600 mb-3">{challenge.description}</p>
+                  <p className="text-sm text-slate-400 mb-3">{challenge.description}</p>
                   
                   <div className="flex items-center space-x-3">
-                    <div className="flex-1 h-2 bg-medical-200 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-dark-700 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPercent}%` }}
                         className={`h-full rounded-full ${
-                          challenge.completed 
-                            ? 'bg-green-500' 
-                            : 'bg-primary-500'
+                          challenge.completed ? 'bg-green-500' : 'bg-primary-500'
                         }`}
                       />
                     </div>
-                    <span className="text-sm text-medical-600 font-medium">
+                    <span className="text-sm text-slate-400 font-medium">
                       {challenge.progress}/{challenge.target}
                     </span>
                   </div>

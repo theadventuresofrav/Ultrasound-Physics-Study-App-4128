@@ -1,78 +1,24 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { useStudy } from '../context/StudyContext';
 import { sections } from '../data/questions';
-import SafeIcon from '../common/SafeIcon';
 import StudySection from '../components/StudySection';
-import DiagramViewer from '../components/DiagramViewer';
-import ConversationStarters from '../components/ConversationStarters';
-import { getDiagrams } from '../services/diagramService';
+import DailyChallenges from '../components/DailyChallenges';
+import StudyStreak from '../components/StudyStreak';
+import AchievementPanel from '../components/AchievementPanel';
+import Leaderboard from '../components/Leaderboard';
+import RecommendedStudyMaterials from '../components/RecommendedEpisodes';
+import AgainstAllOddsInspiration from '../components/AgainstAllOddsInspiration';
+import GameNotifications from '../components/GameNotifications';
+import VoiceReadingBanner from '../components/VoiceReadingBanner';
+import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiTarget, FiBook, FiTrendingUp, FiClock, FiAward, FiActivity, FiCheckCircle, FiArrowRight, FiUsers, FiDatabase, FiImage } = FiIcons;
+const { FiTarget, FiBook, FiCpu, FiClock, FiTool, FiCreditCard } = FiIcons;
 
 function Dashboard() {
-  const [showDiagrams, setShowDiagrams] = useState(false);
-  const [diagrams, setDiagrams] = useState([]);
-
-  // Mock user data - in a real app this would come from context/state
-  const mockUser = {
-    name: 'Study Warrior',
-    role: 'Sonography Student',
-    specialty: 'General Ultrasound',
-    interests: 'Cardiac imaging, Physics principles',
-    background: 'Second year sonography student preparing for registry exams'
-  };
-
-  // Mock progress data
-  const mockProgress = {
-    questionsAnswered: 45,
-    correctAnswers: 38,
-    studyTime: 180, // minutes
-    streaks: { longest: 12 }
-  };
-
-  const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
-  const completionRate = Math.round((mockProgress.correctAnswers / Math.max(mockProgress.questionsAnswered, 1)) * 100);
-  const overallProgress = Math.round((mockProgress.questionsAnswered / totalQuestions) * 100);
-
-  const stats = [
-    {
-      label: 'Questions Answered',
-      value: mockProgress.questionsAnswered,
-      total: totalQuestions,
-      icon: FiCheckCircle,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50'
-    },
-    {
-      label: 'Accuracy Rate',
-      value: `${completionRate}%`,
-      icon: FiTrendingUp,
-      color: 'text-green-600',
-      bg: 'bg-green-50'
-    },
-    {
-      label: 'Study Time',
-      value: `${Math.round(mockProgress.studyTime / 60)}min`,
-      icon: FiClock,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50'
-    },
-    {
-      label: 'Best Streak',
-      value: mockProgress.streaks.longest,
-      icon: FiAward,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50'
-    }
-  ];
-
-  const handleViewDiagrams = (topic) => {
-    const relevantDiagrams = getDiagrams(topic);
-    setDiagrams(relevantDiagrams);
-    setShowDiagrams(true);
-  };
+  const { state } = useStudy();
 
   return (
     <motion.div
@@ -80,148 +26,149 @@ function Dashboard() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-medical-900 mb-4">
-          Welcome to Your Study Dashboard
-        </h1>
-        <p className="text-lg text-medical-600 max-w-2xl mx-auto">
-          Master ultrasound physics with our comprehensive study guide. Track your progress,
-          practice with interactive quizzes, and prepare for your certification exam.
-        </p>
-        <div className="mt-4">
-          <button
-            onClick={() => handleViewDiagrams("ultrasound physics overview")}
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors"
-          >
-            <SafeIcon icon={FiImage} />
-            <span>View Ultrasound Physics Diagrams</span>
-          </button>
-        </div>
+      <GameNotifications />
+      <VoiceReadingBanner />
+
+      {/* Welcome Section */}
+      <div className="text-center mb-12">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl font-bold text-slate-100 mb-4"
+        >
+          Welcome to Sonography School 2025 (SPI)
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-lg text-slate-400 max-w-3xl mx-auto"
+        >
+          Master ultrasound physics and SPI exam preparation with interactive tools, practice questions, 
+          and comprehensive educational content. Now with voice reading for enhanced accessibility!
+        </motion.p>
       </div>
 
-      {/* Progress Overview */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-medical-200">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-medical-900">Your Progress</h2>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-primary-600">{overallProgress}%</div>
-            <div className="text-sm text-medical-600">Complete</div>
-          </div>
-        </div>
-        <div className="h-4 bg-medical-200 rounded-full overflow-hidden mb-6">
+      {/* Quick Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <Link to="/quiz/practice" className="group">
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${overallProgress}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`${stat.bg} rounded-xl p-4 border border-opacity-20`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className={`text-2xl font-bold ${stat.color}`}>
-                    {stat.value}
-                    {stat.total && <span className="text-sm text-medical-500">/{stat.total}</span>}
-                  </div>
-                  <div className="text-sm text-medical-600">{stat.label}</div>
-                </div>
-                <SafeIcon icon={stat.icon} className={`text-2xl ${stat.color}`} />
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-primary-500/20"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-primary-500/20 rounded-xl border border-primary-500/30">
+                <SafeIcon icon={FiTarget} className="text-2xl text-primary-400" />
               </div>
-            </motion.div>
-          ))}
+              <div>
+                <h3 className="font-bold text-slate-200 group-hover:text-primary-400 transition-colors">Practice Quiz</h3>
+                <p className="text-sm text-slate-400">Test your knowledge</p>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+
+        <Link to="/physics-tools" className="group">
+          <motion.div
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/20"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-green-500/20 rounded-xl border border-green-500/30">
+                <SafeIcon icon={FiTool} className="text-2xl text-green-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-200 group-hover:text-green-400 transition-colors">Physics Tools</h3>
+                <p className="text-sm text-slate-400">Interactive calculators</p>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+
+        <Link to="/spi-mock-exam" className="group">
+          <motion.div
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/20"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30">
+                <SafeIcon icon={FiClock} className="text-2xl text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-200 group-hover:text-purple-400 transition-colors">SPI Mock Exam</h3>
+                <p className="text-sm text-slate-400">Full practice test</p>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+
+        <Link to="/pricing" className="group">
+          <motion.div
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-orange-500/20"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-orange-500/20 rounded-xl border border-orange-500/30">
+                <SafeIcon icon={FiCreditCard} className="text-2xl text-orange-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-200 group-hover:text-orange-400 transition-colors">Subscribe</h3>
+                <p className="text-sm text-slate-400">Get full access</p>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Study Sections */}
+          <div>
+            <motion.h2 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-2xl font-bold text-slate-100 mb-6 flex items-center"
+            >
+              <SafeIcon icon={FiBook} className="mr-3 text-primary-400" />
+              Study Sections
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {sections.map((section, index) => (
+                <motion.div
+                  key={section.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <StudySection section={section} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Against All Odds Inspiration */}
+          <AgainstAllOddsInspiration />
+
+          {/* Recommended Study Materials */}
+          <RecommendedStudyMaterials />
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-8">
+          <StudyStreak />
+          <DailyChallenges />
+          <Leaderboard />
         </div>
       </div>
 
-      {/* Conversation Starters */}
-      <ConversationStarters userInfo={mockUser} />
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-8 text-white"
-        >
-          <div className="flex items-center space-x-4 mb-4">
-            <SafeIcon icon={FiTarget} className="text-3xl" />
-            <div>
-              <h3 className="text-xl font-bold">Practice Quiz</h3>
-              <p className="opacity-90">Test your knowledge with random questions</p>
-            </div>
-          </div>
-          <Link
-            to="/quiz/practice"
-            className="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
-          >
-            <span>Start Practice</span>
-            <SafeIcon icon={FiArrowRight} />
-          </Link>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-8 text-white"
-        >
-          <div className="flex items-center space-x-4 mb-4">
-            <SafeIcon icon={FiUsers} className="text-3xl" />
-            <div>
-              <h3 className="text-xl font-bold">Multiplayer</h3>
-              <p className="opacity-90">Compete with AI or other students</p>
-            </div>
-          </div>
-          <Link
-            to="/multiplayer"
-            className="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
-          >
-            <span>Play Now</span>
-            <SafeIcon icon={FiArrowRight} />
-          </Link>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-8 text-white"
-        >
-          <div className="flex items-center space-x-4 mb-4">
-            <SafeIcon icon={FiDatabase} className="text-3xl" />
-            <div>
-              <h3 className="text-xl font-bold">Knowledge Base</h3>
-              <p className="opacity-90">Access comprehensive study resources</p>
-            </div>
-          </div>
-          <Link
-            to="/knowledge"
-            className="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
-          >
-            <span>Explore</span>
-            <SafeIcon icon={FiArrowRight} />
-          </Link>
-        </motion.div>
-      </div>
-
-      {/* Section Overview */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-medical-200">
-        <h2 className="text-2xl font-bold text-medical-900 mb-6">Study Sections</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sections.map((section) => (
-            <StudySection key={section.id} section={section} />
-          ))}
-        </div>
-      </div>
-
-      {showDiagrams && (
-        <DiagramViewer
-          diagrams={diagrams}
-          onClose={() => setShowDiagrams(false)}
-        />
-      )}
+      {/* Achievement Panel */}
+      <AchievementPanel />
     </motion.div>
   );
 }

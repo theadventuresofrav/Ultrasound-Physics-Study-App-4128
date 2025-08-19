@@ -10,40 +10,40 @@ import ExamResults from './ExamResults';
 import { mockExamQuestions } from '../../data/mockExamQuestions';
 import { useStudy } from '../../context/StudyContext';
 
-const { FiFlag, FiSave, FiAlertTriangle } = FiIcons;
+const { FiFlag, FiSave, FiAlertTriangle, FiClock, FiTarget, FiBookOpen } = FiIcons;
 
 function MockExam() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState([]);
   const [isExamComplete, setIsExamComplete] = useState(false);
-  const [remainingTime, setRemainingTime] = useState(180 * 60); // 3 hours in seconds
+  const [remainingTime, setRemainingTime] = useState(150 * 60); // 2.5 hours in seconds
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [examStarted, setExamStarted] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
+
   const { dispatch } = useStudy();
   const navigate = useNavigate();
-  
+
   // Refs for timer
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
-  
+
   // Start the exam timer
   useEffect(() => {
     if (examStarted && !isExamComplete) {
-      startTimeRef.current = Date.now() - ((180 * 60) - remainingTime) * 1000;
-      
+      startTimeRef.current = Date.now() - ((150 * 60) - remainingTime) * 1000;
       timerRef.current = setInterval(() => {
         const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        const newRemainingTime = Math.max(0, 180 * 60 - elapsedSeconds);
-        
+        const newRemainingTime = Math.max(0, 150 * 60 - elapsedSeconds);
         setRemainingTime(newRemainingTime);
-        
+
         if (newRemainingTime <= 0) {
           clearInterval(timerRef.current);
           submitExam();
         }
       }, 1000);
-      
+
       return () => {
         if (timerRef.current) {
           clearInterval(timerRef.current);
@@ -51,14 +51,14 @@ function MockExam() {
       };
     }
   }, [examStarted, isExamComplete]);
-  
+
   const handleAnswerSelect = (questionId, answerIndex) => {
     setSelectedAnswers(prev => ({
       ...prev,
       [questionId]: answerIndex
     }));
   };
-  
+
   const handleFlagQuestion = (questionId) => {
     setFlaggedQuestions(prev => {
       if (prev.includes(questionId)) {
@@ -68,22 +68,21 @@ function MockExam() {
       }
     });
   };
-  
+
   const goToQuestion = (index) => {
     if (index >= 0 && index < mockExamQuestions.length) {
       setCurrentQuestionIndex(index);
     }
   };
-  
+
   const submitExam = () => {
     // Calculate results
     let correctCount = 0;
     let incorrectCount = 0;
     let unansweredCount = 0;
-    
+
     mockExamQuestions.forEach(question => {
       const selectedAnswer = selectedAnswers[question.id];
-      
       if (selectedAnswer === undefined) {
         unansweredCount++;
       } else if (selectedAnswer === question.correctAnswer) {
@@ -92,12 +91,12 @@ function MockExam() {
         incorrectCount++;
       }
     });
-    
+
     const totalQuestions = mockExamQuestions.length;
     const score = Math.round((correctCount / totalQuestions) * 100);
-    const timeSpent = (180 * 60) - remainingTime;
-    
-    // Save results
+    const timeSpent = (150 * 60) - remainingTime;
+
+    // Save results to study context
     dispatch({
       type: 'SAVE_EXAM_RESULT',
       payload: {
@@ -108,30 +107,33 @@ function MockExam() {
         unansweredCount,
         timeSpent,
         totalQuestions,
-        answers: selectedAnswers
+        answers: selectedAnswers,
+        examType: 'SPI 2025-2026'
       }
     });
-    
+
     // Clear timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
+
     setIsExamComplete(true);
   };
-  
+
   const confirmSubmit = () => {
     setShowConfirmSubmit(true);
   };
-  
+
   const handleStartExam = () => {
     setExamStarted(true);
+    setShowInstructions(false);
   };
-  
+
   // Current question data
   const currentQuestion = mockExamQuestions[currentQuestionIndex];
-  
-  if (!examStarted) {
+
+  // Instructions Screen
+  if (showInstructions) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -139,71 +141,112 @@ function MockExam() {
         className="max-w-4xl mx-auto"
       >
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-medical-200 shadow-lg">
-          <h1 className="text-3xl font-bold text-medical-900 mb-6">Ultrasound Physics Mock Exam</h1>
-          
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-medical-800 mb-4">Exam Information</h2>
-            <ul className="space-y-3 text-medical-700">
-              <li className="flex items-center">
-                <span className="w-40 font-medium">Total Questions:</span>
-                <span>110 multiple choice questions</span>
-              </li>
-              <li className="flex items-center">
-                <span className="w-40 font-medium">Time Limit:</span>
-                <span>3 hours (180 minutes)</span>
-              </li>
-              <li className="flex items-center">
-                <span className="w-40 font-medium">Passing Score:</span>
-                <span>75% or higher</span>
-              </li>
-              <li className="flex items-center">
-                <span className="w-40 font-medium">Question Navigation:</span>
-                <span>You can move freely between questions</span>
-              </li>
-              <li className="flex items-center">
-                <span className="w-40 font-medium">Flagging:</span>
-                <span>You can flag questions to review later</span>
-              </li>
-            </ul>
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-primary-500 rounded-full mx-auto flex items-center justify-center mb-4">
+              <SafeIcon icon={FiTarget} className="text-3xl text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-medical-900 mb-2">SPI 2025-2026 Mock Exam</h1>
+            <p className="text-medical-600">
+              Sonography Principles & Instrumentation Practice Exam
+            </p>
           </div>
-          
-          <div className="bg-primary-50 p-6 rounded-xl mb-8 border border-primary-100">
-            <h2 className="text-xl font-semibold text-primary-800 mb-3">Exam Instructions</h2>
-            <ul className="space-y-2 text-medical-700">
-              <li>• Read each question carefully before selecting an answer</li>
-              <li>• You can change your answers at any time during the exam</li>
-              <li>• Use the navigation panel to move between questions</li>
-              <li>• Flag difficult questions to review later if time permits</li>
-              <li>• The timer will display your remaining time</li>
-              <li>• The exam will automatically submit when time expires</li>
-            </ul>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-primary-50 rounded-xl p-6 border border-primary-200">
+              <h2 className="text-xl font-bold text-medical-900 mb-4 flex items-center">
+                <SafeIcon icon={FiBookOpen} className="mr-2 text-primary-600" />
+                Exam Information
+              </h2>
+              <ul className="space-y-3 text-medical-700">
+                <li className="flex items-center">
+                  <span className="w-40 font-medium">Total Questions:</span>
+                  <span>110 multiple choice questions</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="w-40 font-medium">Time Limit:</span>
+                  <span>2.5 hours (150 minutes)</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="w-40 font-medium">Passing Score:</span>
+                  <span>75% or higher</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="w-40 font-medium">Question Types:</span>
+                  <span>Multiple choice (A, B, C, D)</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="w-40 font-medium">Navigation:</span>
+                  <span>You can move freely between questions</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+              <h2 className="text-xl font-bold text-medical-900 mb-4 flex items-center">
+                <SafeIcon icon={FiClock} className="mr-2 text-blue-600" />
+                Content Areas
+              </h2>
+              <ul className="space-y-2 text-medical-700 text-sm">
+                <li>• Basic Ultrasound Physics (25 questions)</li>
+                <li>• Transducers & Sound Beams (20 questions)</li>
+                <li>• Pulse-Echo Instrumentation (25 questions)</li>
+                <li>• Doppler Instrumentation (25 questions)</li>
+                <li>• Artifacts & Quality Assurance (15 questions)</li>
+              </ul>
+            </div>
           </div>
-          
-          <div className="flex justify-center">
+
+          <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200 mb-8">
+            <h2 className="text-xl font-bold text-medical-900 mb-3 flex items-center">
+              <SafeIcon icon={FiAlertTriangle} className="mr-2 text-yellow-600" />
+              Important Instructions
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <ul className="space-y-2 text-medical-700">
+                <li>• Read each question carefully before selecting an answer</li>
+                <li>• You can change your answers at any time during the exam</li>
+                <li>• Use the navigation panel to move between questions</li>
+                <li>• Flag difficult questions to review later if time permits</li>
+              </ul>
+              <ul className="space-y-2 text-medical-700">
+                <li>• The timer will display your remaining time</li>
+                <li>• The exam will automatically submit when time expires</li>
+                <li>• Review your answers before final submission</li>
+                <li>• Detailed explanations will be provided after completion</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="text-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleStartExam}
-              className="px-8 py-4 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-colors shadow-lg"
+              className="px-8 py-4 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-colors shadow-lg text-lg"
             >
-              Begin 3-Hour Mock Exam
+              Begin SPI Mock Exam
             </motion.button>
+            <p className="text-sm text-medical-500 mt-4">
+              Make sure you have 2.5 hours available before starting
+            </p>
           </div>
         </div>
       </motion.div>
     );
   }
-  
+
+  // Results Screen
   if (isExamComplete) {
     return (
       <ExamResults
         answers={selectedAnswers}
         questions={mockExamQuestions}
-        timeSpent={((180 * 60) - remainingTime)}
+        timeSpent={((150 * 60) - remainingTime)}
       />
     );
   }
-  
+
+  // Main Exam Interface
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -213,13 +256,16 @@ function MockExam() {
       {/* Exam Header with Timer */}
       <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 shadow-md border border-medical-200 sticky top-16 z-30">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-medical-900">
-            Ultrasound Physics Mock Exam
-          </h1>
-          
+          <div>
+            <h1 className="text-xl font-bold text-medical-900">
+              SPI 2025-2026 Mock Exam
+            </h1>
+            <p className="text-sm text-medical-600">
+              Question {currentQuestionIndex + 1} of {mockExamQuestions.length}
+            </p>
+          </div>
           <div className="flex items-center space-x-4">
             <ExamTimer remainingTime={remainingTime} />
-            
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -231,8 +277,18 @@ function MockExam() {
             </motion.button>
           </div>
         </div>
+
+        {/* Progress Bar */}
+        <div className="mt-4 h-2 bg-medical-200 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentQuestionIndex + 1) / mockExamQuestions.length) * 100}%` }}
+            className="h-full bg-primary-500 rounded-full"
+            transition={{ duration: 0.3 }}
+          />
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Question Navigation Sidebar */}
         <div className="lg:col-span-1">
@@ -244,7 +300,7 @@ function MockExam() {
             onQuestionClick={goToQuestion}
           />
         </div>
-        
+
         {/* Question Content */}
         <div className="lg:col-span-3">
           <AnimatePresence mode="wait">
@@ -256,37 +312,48 @@ function MockExam() {
               className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-medical-200"
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-medical-900">
-                  Question {currentQuestionIndex + 1} of {mockExamQuestions.length}
-                </h2>
-                
+                <div className="flex items-center space-x-4">
+                  <h2 className="text-lg font-semibold text-medical-900">
+                    Question {currentQuestionIndex + 1}
+                  </h2>
+                  <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                    {currentQuestion.category}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    currentQuestion.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                    currentQuestion.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {currentQuestion.difficulty}
+                  </span>
+                </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleFlagQuestion(currentQuestion.id)}
-                  className={`p-2 rounded-lg flex items-center space-x-2 ${
+                  className={`p-2 rounded-lg flex items-center space-x-2 transition-colors ${
                     flaggedQuestions.includes(currentQuestion.id)
                       ? 'bg-yellow-100 text-yellow-700'
                       : 'bg-medical-100 text-medical-600 hover:bg-medical-200'
                   }`}
                 >
                   <SafeIcon icon={FiFlag} />
-                  <span>{flaggedQuestions.includes(currentQuestion.id) ? 'Flagged' : 'Flag Question'}</span>
+                  <span>{flaggedQuestions.includes(currentQuestion.id) ? 'Flagged' : 'Flag'}</span>
                 </motion.button>
               </div>
-              
+
               <ExamQuestion
                 question={currentQuestion}
                 selectedAnswer={selectedAnswers[currentQuestion.id]}
                 onAnswerSelect={(answerIndex) => handleAnswerSelect(currentQuestion.id, answerIndex)}
                 isExamMode={true}
               />
-              
+
               <div className="flex items-center justify-between mt-6">
                 <button
                   onClick={() => goToQuestion(currentQuestionIndex - 1)}
                   disabled={currentQuestionIndex === 0}
-                  className={`px-4 py-2 rounded-lg font-medium ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     currentQuestionIndex === 0
                       ? 'bg-medical-100 text-medical-400 cursor-not-allowed'
                       : 'bg-medical-100 text-medical-700 hover:bg-medical-200'
@@ -294,11 +361,17 @@ function MockExam() {
                 >
                   Previous Question
                 </button>
-                
+
+                <div className="text-center">
+                  <p className="text-sm text-medical-600">
+                    {Object.keys(selectedAnswers).length} of {mockExamQuestions.length} answered
+                  </p>
+                </div>
+
                 <button
                   onClick={() => goToQuestion(currentQuestionIndex + 1)}
                   disabled={currentQuestionIndex === mockExamQuestions.length - 1}
-                  className={`px-4 py-2 rounded-lg font-medium ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     currentQuestionIndex === mockExamQuestions.length - 1
                       ? 'bg-medical-100 text-medical-400 cursor-not-allowed'
                       : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
@@ -311,7 +384,7 @@ function MockExam() {
           </AnimatePresence>
         </div>
       </div>
-      
+
       {/* Submit Confirmation Modal */}
       <AnimatePresence>
         {showConfirmSubmit && (
@@ -335,16 +408,17 @@ function MockExam() {
                 </div>
                 <h3 className="text-xl font-bold text-medical-900">Submit Exam?</h3>
               </div>
-              
+
               <p className="text-medical-700 mb-6">
-                You are about to submit your exam. You have answered {Object.keys(selectedAnswers).length} out of {mockExamQuestions.length} questions.
+                You are about to submit your SPI 2025-2026 Mock Exam. You have answered{' '}
+                {Object.keys(selectedAnswers).length} out of {mockExamQuestions.length} questions.
                 {Object.keys(selectedAnswers).length < mockExamQuestions.length && (
-                  <span className="block mt-2 text-yellow-600">
+                  <span className="block mt-2 text-yellow-600 font-medium">
                     Warning: You have {mockExamQuestions.length - Object.keys(selectedAnswers).length} unanswered questions.
                   </span>
                 )}
               </p>
-              
+
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowConfirmSubmit(false)}

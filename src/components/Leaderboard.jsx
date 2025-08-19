@@ -35,14 +35,10 @@ function Leaderboard() {
   const fullLeaderboard = [...MOCK_LEADERBOARD, currentUserEntry]
     .sort((a, b) => {
       switch (category) {
-        case 'xp':
-          return b.xp - a.xp;
-        case 'accuracy':
-          return b.accuracy - a.accuracy;
-        case 'streak':
-          return b.streak - a.streak;
-        default:
-          return b.xp - a.xp;
+        case 'xp': return b.xp - a.xp;
+        case 'accuracy': return b.accuracy - a.accuracy;
+        case 'streak': return b.streak - a.streak;
+        default: return b.xp - a.xp;
       }
     });
 
@@ -73,7 +69,6 @@ function Leaderboard() {
           <SafeIcon icon={FiTrophy} className="text-2xl text-yellow-600" />
           <h2 className="text-2xl font-bold text-medical-900">Leaderboard</h2>
         </div>
-        
         <div className="flex space-x-2">
           <select
             value={category}
@@ -84,7 +79,6 @@ function Leaderboard() {
             <option value="accuracy">Accuracy</option>
             <option value="streak">Streak</option>
           </select>
-          
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
@@ -126,7 +120,6 @@ function Leaderboard() {
       <div className="space-y-3">
         {fullLeaderboard.slice(0, 10).map((entry, index) => {
           const rank = index + 1;
-          
           return (
             <motion.div
               key={entry.id}
@@ -135,8 +128,8 @@ function Leaderboard() {
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02 }}
               className={`p-4 rounded-xl border transition-all duration-200 ${
-                entry.isCurrentUser
-                  ? 'border-primary-300 bg-primary-50 shadow-md'
+                entry.isCurrentUser 
+                  ? 'border-primary-300 bg-primary-50 shadow-md' 
                   : 'border-medical-200 bg-white hover:border-primary-200 hover:shadow-sm'
               }`}
             >
@@ -144,9 +137,7 @@ function Leaderboard() {
                 <div className={`px-3 py-1 rounded-full text-sm font-bold ${getRankColor(rank)}`}>
                   {getRankIcon(rank)}
                 </div>
-                
                 <div className="text-2xl">{entry.avatar}</div>
-                
                 <div className="flex-1">
                   <h3 className="font-semibold text-medical-900">
                     {entry.name}
@@ -159,7 +150,6 @@ function Leaderboard() {
                     <span>🔥 {entry.streak}</span>
                   </div>
                 </div>
-                
                 <div className="text-right">
                   <div className="text-lg font-bold text-medical-900">
                     {category === 'xp' && `${entry.xp} XP`}

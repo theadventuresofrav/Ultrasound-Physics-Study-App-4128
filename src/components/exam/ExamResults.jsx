@@ -4,41 +4,40 @@ import { Link } from 'react-router-dom';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
 import ExamQuestion from './ExamQuestion';
-import { Chart } from 'echarts-for-react';
+import ReactECharts from 'echarts-for-react';
 
 const { FiArrowRight, FiCheck, FiX, FiAlertCircle, FiCheckCircle, FiClock, FiTarget, FiFilter } = FiIcons;
 
 function ExamResults({ answers, questions, timeSpent }) {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
-  
+
   // Calculate results
   const totalQuestions = questions.length;
   const answeredCount = Object.keys(answers).length;
   const unansweredCount = totalQuestions - answeredCount;
-  
+
   // Count correct answers
   const correctAnswers = questions.filter(q => answers[q.id] === q.correctAnswer);
   const correctCount = correctAnswers.length;
   const incorrectCount = answeredCount - correctCount;
-  
+
   // Calculate score
   const score = Math.round((correctCount / totalQuestions) * 100);
   const passed = score >= 75; // Passing threshold is 75%
-  
+
   // Format time spent
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`;
     } else {
       return `${minutes}m ${secs}s`;
     }
   };
-  
+
   // Filter questions based on selected filter
   const getFilteredQuestions = () => {
     switch (selectedFilter) {
@@ -52,7 +51,7 @@ function ExamResults({ answers, questions, timeSpent }) {
         return questions;
     }
   };
-  
+
   // Chart options
   const chartOptions = {
     tooltip: {
@@ -91,17 +90,29 @@ function ExamResults({ answers, questions, timeSpent }) {
           show: false
         },
         data: [
-          { value: correctCount, name: 'Correct', itemStyle: { color: '#10b981' } },
-          { value: incorrectCount, name: 'Incorrect', itemStyle: { color: '#ef4444' } },
-          { value: unansweredCount, name: 'Unanswered', itemStyle: { color: '#64748b' } }
+          {
+            value: correctCount,
+            name: 'Correct',
+            itemStyle: { color: '#10b981' }
+          },
+          {
+            value: incorrectCount,
+            name: 'Incorrect',
+            itemStyle: { color: '#ef4444' }
+          },
+          {
+            value: unansweredCount,
+            name: 'Unanswered',
+            itemStyle: { color: '#64748b' }
+          }
         ]
       }
     ]
   };
-  
+
   const filteredQuestions = getFilteredQuestions();
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId) || filteredQuestions[0];
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -114,12 +125,11 @@ function ExamResults({ answers, questions, timeSpent }) {
           <div>
             <h1 className="text-3xl font-bold text-medical-900 mb-2">Exam Results</h1>
             <p className="text-medical-600">
-              {passed 
-                ? "Congratulations! You've passed the mock exam."
+              {passed
+                ? "Congratulations! You've passed the Sonographer Aptitude Test."
                 : "You did not pass this time, but keep practicing!"}
             </p>
           </div>
-          
           <div className="mt-4 md:mt-0">
             <div className={`text-4xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>
               {score}%
@@ -129,13 +139,13 @@ function ExamResults({ answers, questions, timeSpent }) {
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Results Chart */}
           <div className="h-80">
-            <Chart option={chartOptions} style={{ height: '100%' }} />
+            <ReactECharts option={chartOptions} style={{ height: '100%' }} />
           </div>
-          
+
           {/* Statistics */}
           <div className="space-y-4 flex flex-col justify-center">
             <div className="grid grid-cols-2 gap-4">
@@ -147,7 +157,7 @@ function ExamResults({ answers, questions, timeSpent }) {
                 <div className="text-2xl font-bold text-green-600">{correctCount}</div>
                 <div className="text-sm text-medical-500">questions</div>
               </div>
-              
+
               <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                 <div className="flex items-center space-x-2 mb-2">
                   <SafeIcon icon={FiX} className="text-red-600" />
@@ -157,7 +167,7 @@ function ExamResults({ answers, questions, timeSpent }) {
                 <div className="text-sm text-medical-500">questions</div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-medical-50 p-4 rounded-xl border border-medical-100">
                 <div className="flex items-center space-x-2 mb-2">
@@ -167,7 +177,7 @@ function ExamResults({ answers, questions, timeSpent }) {
                 <div className="text-2xl font-bold text-medical-600">{unansweredCount}</div>
                 <div className="text-sm text-medical-500">questions</div>
               </div>
-              
+
               <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
                 <div className="flex items-center space-x-2 mb-2">
                   <SafeIcon icon={FiClock} className="text-blue-600" />
@@ -179,7 +189,7 @@ function ExamResults({ answers, questions, timeSpent }) {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-center space-x-4">
           <Link
             to="/"
@@ -187,7 +197,6 @@ function ExamResults({ answers, questions, timeSpent }) {
           >
             Return to Dashboard
           </Link>
-          
           <Link
             to="/quiz/practice"
             className="px-6 py-3 bg-primary-500 text-white font-medium rounded-xl hover:bg-primary-600 transition-colors flex items-center space-x-2"
@@ -197,11 +206,11 @@ function ExamResults({ answers, questions, timeSpent }) {
           </Link>
         </div>
       </div>
-      
+
       {/* Question Review */}
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-medical-200 shadow-lg">
         <h2 className="text-2xl font-bold text-medical-900 mb-6">Review Questions</h2>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filter Sidebar */}
           <div className="lg:col-span-1 space-y-4">
@@ -210,7 +219,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                 <SafeIcon icon={FiFilter} className="text-medical-600" />
                 <h3 className="font-semibold text-medical-900">Filters</h3>
               </div>
-              
               <div className="space-y-2">
                 <button
                   onClick={() => setSelectedFilter('all')}
@@ -222,7 +230,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                 >
                   All Questions ({totalQuestions})
                 </button>
-                
                 <button
                   onClick={() => setSelectedFilter('correct')}
                   className={`w-full p-2 rounded-lg text-left ${
@@ -236,7 +243,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                     <span>Correct ({correctCount})</span>
                   </div>
                 </button>
-                
                 <button
                   onClick={() => setSelectedFilter('incorrect')}
                   className={`w-full p-2 rounded-lg text-left ${
@@ -250,7 +256,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                     <span>Incorrect ({incorrectCount})</span>
                   </div>
                 </button>
-                
                 <button
                   onClick={() => setSelectedFilter('unanswered')}
                   className={`w-full p-2 rounded-lg text-left ${
@@ -266,19 +271,17 @@ function ExamResults({ answers, questions, timeSpent }) {
                 </button>
               </div>
             </div>
-            
+
             {/* Question List */}
             <div className="bg-white p-4 rounded-xl border border-medical-100 max-h-[400px] overflow-y-auto">
               <h3 className="font-semibold text-medical-900 mb-3">Questions</h3>
-              
               <div className="space-y-2">
                 {filteredQuestions.map((question, index) => {
                   const isSelected = selectedQuestionId === question.id;
                   const isAnswered = answers[question.id] !== undefined;
                   const isCorrect = answers[question.id] === question.correctAnswer;
-                  
+
                   let buttonClasses = "w-full p-2 rounded-lg text-left text-sm transition-all";
-                  
                   if (isSelected) {
                     buttonClasses += " bg-primary-100 border-l-4 border-primary-500 text-primary-800";
                   } else if (!isAnswered) {
@@ -288,7 +291,7 @@ function ExamResults({ answers, questions, timeSpent }) {
                   } else {
                     buttonClasses += " text-red-600 hover:bg-red-50";
                   }
-                  
+
                   return (
                     <button
                       key={question.id}
@@ -298,7 +301,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                       <div className="flex items-center space-x-2">
                         <span className="font-medium">Q{questions.indexOf(question) + 1}.</span>
                         <span className="truncate">{question.question.substring(0, 40)}...</span>
-                        
                         {!isAnswered ? (
                           <SafeIcon icon={FiAlertCircle} className="text-medical-400 ml-auto" />
                         ) : isCorrect ? (
@@ -310,7 +312,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                     </button>
                   );
                 })}
-                
                 {filteredQuestions.length === 0 && (
                   <div className="text-center py-4 text-medical-500">
                     No questions match the selected filter
@@ -319,7 +320,7 @@ function ExamResults({ answers, questions, timeSpent }) {
               </div>
             </div>
           </div>
-          
+
           {/* Question Detail */}
           <div className="lg:col-span-3">
             {selectedQuestion && (
@@ -328,7 +329,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                   <h3 className="font-semibold text-medical-900">
                     Question {questions.indexOf(selectedQuestion) + 1}
                   </h3>
-                  
                   {answers[selectedQuestion.id] !== undefined ? (
                     answers[selectedQuestion.id] === selectedQuestion.correctAnswer ? (
                       <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
@@ -345,14 +345,14 @@ function ExamResults({ answers, questions, timeSpent }) {
                     </div>
                   )}
                 </div>
-                
+
                 <ExamQuestion
                   question={selectedQuestion}
                   selectedAnswer={answers[selectedQuestion.id]}
                   onAnswerSelect={() => {}} // No-op since we're in review mode
                   showExplanation={true}
                 />
-                
+
                 <div className="flex justify-between mt-6">
                   <button
                     onClick={() => {
@@ -370,7 +370,6 @@ function ExamResults({ answers, questions, timeSpent }) {
                   >
                     Previous Question
                   </button>
-                  
                   <button
                     onClick={() => {
                       const currentIndex = filteredQuestions.findIndex(q => q.id === selectedQuestion.id);

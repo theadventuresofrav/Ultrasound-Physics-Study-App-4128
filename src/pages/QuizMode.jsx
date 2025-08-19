@@ -3,7 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { allQuestions } from '../data/questions';
 import { useStudy } from '../context/StudyContext';
+import { useAuth } from '../context/AuthContext';
 import SafeIcon from '../common/SafeIcon';
+import MembershipGate from '../components/MembershipGate';
+import UsageTracker from '../components/UsageTracker';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiClock, FiTarget, FiCheck, FiX, FiArrowLeft, FiRotateCcw } = FiIcons;
@@ -11,18 +14,33 @@ const { FiClock, FiTarget, FiCheck, FiX, FiArrowLeft, FiRotateCcw } = FiIcons;
 function QuizMode() {
   const { mode } = useParams();
   const { dispatch } = useStudy();
+  const { canUseFeature, membership } = useAuth();
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [quizComplete, setQuizComplete] = useState(false);
   const [startTime] = useState(Date.now());
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [dailyQuizCount, setDailyQuizCount] = useState(0);
+
+  // Check daily usage
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const savedData = localStorage.getItem(`daily-quiz-usage-${today}`);
+    const usage = savedData ? JSON.parse(savedData) : { count: 0, date: today };
+    setDailyQuizCount(usage.count);
+  }, []);
+
+  // Check if user can take quiz
+  const canTakeQuiz = canUseFeature('dailyQuizzes', dailyQuizCount);
 
   useEffect(() => {
-    // Generate quiz questions
-    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-    setQuizQuestions(shuffled.slice(0, 10)); // 10 question quiz
-  }, [mode]);
+    if (canTakeQuiz) {
+      // Generate quiz questions
+      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+      setQuizQuestions(shuffled.slice(0, 10)); // 10 question quiz
+    }
+  }, [mode, canTakeQuiz]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,7 +55,7 @@ function QuizMode() {
 
   const handleAnswerSelect = (answerIndex) => {
     if (quizComplete) return;
-    
+
     setSelectedAnswers(prev => ({
       ...prev,
       [currentQuestionIndex]: answerIndex
@@ -93,10 +111,20 @@ function QuizMode() {
       });
     });
 
+    // Update daily usage
+    const today = new Date().toDateString();
+    const newUsage = { count: dailyQuizCount + 1, date: today };
+    localStorage.setItem(`daily-quiz-usage-${today}`, JSON.stringify(newUsage));
+    setDailyQuizCount(newUsage.count);
+
     setQuizComplete(true);
   };
 
   const restartQuiz = () => {
+    if (!canUseFeature('dailyQuizzes', dailyQuizCount)) {
+      return; // Can't restart if limit reached
+    }
+
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
     setQuizQuestions(shuffled.slice(0, 10));
     setCurrentQuestionIndex(0);
@@ -109,6 +137,46 @@ function QuizMode() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Show membership gate if user can't access
+  if (!canTakeQuiz) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-primary-600 hover:text-primary-700 mb-4"
+          >
+            <SafeIcon icon={FiArrowLeft} />
+            <span>Back to Dashboard</span>
+          </Link>
+        </div>
+        
+        <MembershipGate 
+          requiredTier="premium" 
+          feature="Unlimited Practice Quizzes"
+          fallback={
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-medical-200 text-center">
+              <h2 className="text-2xl font-bold text-medical-900 mb-4">Daily Quiz Limit Reached</h2>
+              <p className="text-medical-600 mb-6">
+                You've used all {membership.limits.dailyQuizzes} of your daily practice quizzes. 
+                Upgrade to Premium for unlimited access!
+              </p>
+              <UsageTracker feature="dailyQuizzes" currentUsage={dailyQuizCount} />
+              <div className="mt-6">
+                <Link
+                  to="/membership"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
+                >
+                  <span>Upgrade Now</span>
+                </Link>
+              </div>
+            </div>
+          }
+        />
+      </div>
+    );
+  }
 
   if (quizQuestions.length === 0) {
     return (
@@ -143,12 +211,9 @@ function QuizMode() {
             <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${
               percentage >= 80 ? 'bg-green-100' : percentage >= 60 ? 'bg-yellow-100' : 'bg-red-100'
             }`}>
-              <SafeIcon 
-                icon={percentage >= 80 ? FiCheck : FiTarget} 
-                className={`text-3xl ${
-                  percentage >= 80 ? 'text-green-600' : percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
-                }`} 
-              />
+              <SafeIcon icon={percentage >= 80 ? FiCheck : FiTarget} className={`text-3xl ${
+                percentage >= 80 ? 'text-green-600' : percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
+              }`} />
             </div>
           </motion.div>
 
@@ -172,17 +237,26 @@ function QuizMode() {
             </div>
           </div>
 
+          {/* Usage Tracker */}
+          <div className="mb-6">
+            <UsageTracker feature="dailyQuizzes" currentUsage={dailyQuizCount} />
+          </div>
+
           <div className="flex justify-center space-x-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={restartQuiz}
-              className="flex items-center space-x-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-600 transition-colors"
+              disabled={!canUseFeature('dailyQuizzes', dailyQuizCount)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-colors ${
+                canUseFeature('dailyQuizzes', dailyQuizCount)
+                  ? 'bg-primary-500 text-white hover:bg-primary-600'
+                  : 'bg-medical-100 text-medical-400 cursor-not-allowed'
+              }`}
             >
               <SafeIcon icon={FiRotateCcw} />
               <span>Try Again</span>
             </motion.button>
-            
             <Link
               to="/"
               className="flex items-center space-x-2 bg-white text-medical-700 px-6 py-3 rounded-xl font-medium hover:bg-medical-50 border border-medical-200 transition-colors"
@@ -214,13 +288,11 @@ function QuizMode() {
           <SafeIcon icon={FiArrowLeft} />
           <span>Back to Dashboard</span>
         </Link>
-        
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-medical-900 mb-2">Practice Quiz</h1>
             <p className="text-medical-600">Test your knowledge with random questions</p>
           </div>
-          
           <div className="text-right">
             <div className="flex items-center space-x-4 text-sm text-medical-600 mb-2">
               <div className="flex items-center space-x-2">
@@ -232,9 +304,10 @@ function QuizMode() {
                 <span>{currentQuestionIndex + 1} / {totalQuestions}</span>
               </div>
             </div>
+            <UsageTracker feature="dailyQuizzes" currentUsage={dailyQuizCount} showDetails={false} />
           </div>
         </div>
-        
+
         {/* Progress Bar */}
         <div className="mt-6 h-2 bg-medical-200 rounded-full overflow-hidden">
           <motion.div
@@ -258,7 +331,7 @@ function QuizMode() {
           <h2 className="text-xl font-semibold text-medical-900 mb-6">
             {currentQuestion.question}
           </h2>
-          
+
           <div className="space-y-3 mb-8">
             {currentQuestion.options.map((option, index) => (
               <motion.button

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import confetti from 'canvas-confetti';
 
 const { FiTrendingUp, FiAward, FiZap } = FiIcons;
 
@@ -13,7 +12,7 @@ function GameNotifications() {
 
   useEffect(() => {
     const newNotifications = [];
-    
+
     if (state.leveledUp) {
       newNotifications.push({
         id: 'level_up',
@@ -23,15 +22,22 @@ function GameNotifications() {
         icon: FiTrendingUp,
         color: 'from-purple-500 to-pink-500'
       });
-      
+
       // Trigger confetti for level up
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      try {
+        import('canvas-confetti').then(module => {
+          const confetti = module.default;
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        });
+      } catch (error) {
+        console.warn('Confetti effect not available:', error);
+      }
     }
-    
+
     if (state.xpGained > 0 && !state.leveledUp) {
       newNotifications.push({
         id: 'xp_gained',
@@ -42,11 +48,11 @@ function GameNotifications() {
         color: 'from-blue-500 to-cyan-500'
       });
     }
-    
+
     // Check for new achievements
     const lastAchievements = JSON.parse(localStorage.getItem('lastAchievements') || '[]');
     const newAchievements = state.achievements.filter(id => !lastAchievements.includes(id));
-    
+
     newAchievements.forEach(achievementId => {
       const achievement = ACHIEVEMENTS[achievementId];
       if (achievement) {
@@ -59,22 +65,28 @@ function GameNotifications() {
           icon: FiAward,
           color: 'from-yellow-500 to-orange-500'
         });
-        
+
         // Trigger confetti for achievements
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: ['#FFD700', '#FFA500', '#FF6347']
-        });
+        try {
+          import('canvas-confetti').then(module => {
+            const confetti = module.default;
+            confetti({
+              particleCount: 50,
+              spread: 60,
+              origin: { y: 0.7 },
+              colors: ['#FFD700', '#FFA500', '#FF6347']
+            });
+          });
+        } catch (error) {
+          console.warn('Confetti effect not available:', error);
+        }
       }
     });
-    
+
     localStorage.setItem('lastAchievements', JSON.stringify(state.achievements));
-    
+
     if (newNotifications.length > 0) {
       setNotifications(newNotifications);
-      
       // Auto-clear notifications after 4 seconds
       setTimeout(() => {
         setNotifications([]);
