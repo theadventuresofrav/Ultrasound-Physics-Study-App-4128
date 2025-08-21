@@ -26,36 +26,31 @@ function StudyStreak() {
   const streakGoal = 7;
 
   return (
-    <div className="dark-card rounded-2xl p-6 border border-orange-500/30 shadow-lg">
+    <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-6 border border-orange-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-orange-500/20 rounded-lg border border-orange-500/30">
-            <SafeIcon icon={FiFire} className="text-2xl text-orange-400" />
+          <div className="p-2 bg-orange-100 rounded-lg">
+            <SafeIcon icon={FiFire} className="text-2xl text-orange-600" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-200">Study Streak</h3>
-            <p className="text-sm text-slate-400">Keep the momentum going!</p>
+            <h3 className="text-xl font-bold text-medical-900">Study Streak</h3>
+            <p className="text-sm text-medical-600">Keep the momentum going!</p>
           </div>
         </div>
+        
         <div className="text-right">
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="text-3xl font-bold text-orange-400"
-          >
-            {currentStreak}
-          </motion.div>
-          <div className="text-sm text-slate-400">days</div>
+          <div className="text-3xl font-bold text-orange-600">{currentStreak}</div>
+          <div className="text-sm text-medical-600">days</div>
         </div>
       </div>
 
       {/* Streak Progress */}
       <div className="mb-4">
-        <div className="flex items-center justify-between text-sm text-slate-400 mb-2">
+        <div className="flex items-center justify-between text-sm text-medical-600 mb-2">
           <span>Goal: {streakGoal} days</span>
           <span>{currentStreak}/{streakGoal}</span>
         </div>
-        <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+        <div className="h-2 bg-white rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${(currentStreak / streakGoal) * 100}%` }}
@@ -68,15 +63,15 @@ function StudyStreak() {
       <div className="grid grid-cols-7 gap-2">
         {last7Days.map((day, index) => (
           <div key={day.date} className="text-center">
-            <div className="text-xs text-slate-400 mb-1">{day.day}</div>
+            <div className="text-xs text-medical-600 mb-1">{day.day}</div>
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: index * 0.1 }}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                 day.studied
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/50'
-                  : 'bg-dark-700 border-2 border-dark-600 text-slate-500'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white border-2 border-medical-200 text-medical-400'
               }`}
             >
               {day.studied ? '🔥' : '○'}
@@ -86,7 +81,7 @@ function StudyStreak() {
       </div>
 
       <div className="mt-4 text-center">
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-medical-600">
           Study today to keep your streak alive! 🎯
         </p>
       </div>

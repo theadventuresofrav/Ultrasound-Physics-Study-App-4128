@@ -11,11 +11,10 @@ import Leaderboard from '../components/Leaderboard';
 import RecommendedStudyMaterials from '../components/RecommendedEpisodes';
 import AgainstAllOddsInspiration from '../components/AgainstAllOddsInspiration';
 import GameNotifications from '../components/GameNotifications';
-import VoiceReadingBanner from '../components/VoiceReadingBanner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiTarget, FiBook, FiCpu, FiClock, FiTool, FiCreditCard } = FiIcons;
+const { FiTarget, FiBook, FiCpu, FiClock, FiTool, FiCreditCard, FiGraduationCap, FiZap } = FiIcons;
 
 function Dashboard() {
   const { state } = useStudy();
@@ -27,43 +26,32 @@ function Dashboard() {
       className="space-y-8"
     >
       <GameNotifications />
-      <VoiceReadingBanner />
 
       {/* Welcome Section */}
       <div className="text-center mb-12">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-slate-100 mb-4"
-        >
+        <h1 className="text-4xl font-bold text-medical-900 mb-4">
           Welcome to Sonography School 2025 (SPI)
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-lg text-slate-400 max-w-3xl mx-auto"
-        >
-          Master ultrasound physics and SPI exam preparation with interactive tools, practice questions, 
-          and comprehensive educational content. Now with voice reading for enhanced accessibility!
-        </motion.p>
+        </h1>
+        <p className="text-lg text-medical-600 max-w-3xl mx-auto">
+          Master ultrasound physics and SPI exam preparation with interactive tools, practice questions, and comprehensive educational content
+        </p>
       </div>
 
       {/* Quick Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <Link to="/quiz/practice" className="group">
+        <Link to="/courses" className="group">
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-primary-500/20"
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200 shadow-lg hover:shadow-xl transition-all group-hover:border-primary-300"
           >
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-primary-500/20 rounded-xl border border-primary-500/30">
-                <SafeIcon icon={FiTarget} className="text-2xl text-primary-400" />
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
+                <SafeIcon icon={FiGraduationCap} className="text-2xl text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-200 group-hover:text-primary-400 transition-colors">Practice Quiz</h3>
-                <p className="text-sm text-slate-400">Test your knowledge</p>
+                <h3 className="font-bold text-medical-900">SPI Courses</h3>
+                <p className="text-sm text-medical-600">AI-powered learning</p>
               </div>
             </div>
           </motion.div>
@@ -71,53 +59,53 @@ function Dashboard() {
 
         <Link to="/physics-tools" className="group">
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-green-500/20"
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200 shadow-lg hover:shadow-xl transition-all group-hover:border-primary-300"
           >
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-green-500/20 rounded-xl border border-green-500/30">
-                <SafeIcon icon={FiTool} className="text-2xl text-green-400" />
+              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
+                <SafeIcon icon={FiTool} className="text-2xl text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-200 group-hover:text-green-400 transition-colors">Physics Tools</h3>
-                <p className="text-sm text-slate-400">Interactive calculators</p>
+                <h3 className="font-bold text-medical-900">Physics Tools</h3>
+                <p className="text-sm text-medical-600">Interactive calculators</p>
               </div>
             </div>
           </motion.div>
         </Link>
 
-        <Link to="/spi-mock-exam" className="group">
+        <Link to="/comprehensive-exam" className="group">
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/20"
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200 shadow-lg hover:shadow-xl transition-all group-hover:border-primary-300"
           >
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30">
-                <SafeIcon icon={FiClock} className="text-2xl text-purple-400" />
+              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
+                <SafeIcon icon={FiTarget} className="text-2xl text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-200 group-hover:text-purple-400 transition-colors">SPI Mock Exam</h3>
-                <p className="text-sm text-slate-400">Full practice test</p>
+                <h3 className="font-bold text-medical-900">Comprehensive Exam</h3>
+                <p className="text-sm text-medical-600">110-question test</p>
               </div>
             </div>
           </motion.div>
         </Link>
 
-        <Link to="/pricing" className="group">
+        <Link to="/chat-tutor" className="group">
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="dark-card dark-card-hover rounded-2xl p-6 shadow-lg group-hover:shadow-2xl group-hover:shadow-orange-500/20"
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200 shadow-lg hover:shadow-xl transition-all group-hover:border-primary-300"
           >
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-orange-500/20 rounded-xl border border-orange-500/30">
-                <SafeIcon icon={FiCreditCard} className="text-2xl text-orange-400" />
+              <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl">
+                <SafeIcon icon={FiCpu} className="text-2xl text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-200 group-hover:text-orange-400 transition-colors">Subscribe</h3>
-                <p className="text-sm text-slate-400">Get full access</p>
+                <h3 className="font-bold text-medical-900">AI Tutor</h3>
+                <p className="text-sm text-medical-600">Get instant help</p>
               </div>
             </div>
           </motion.div>
@@ -130,24 +118,13 @@ function Dashboard() {
         <div className="lg:col-span-2 space-y-8">
           {/* Study Sections */}
           <div>
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-2xl font-bold text-slate-100 mb-6 flex items-center"
-            >
-              <SafeIcon icon={FiBook} className="mr-3 text-primary-400" />
+            <h2 className="text-2xl font-bold text-medical-900 mb-6 flex items-center">
+              <SafeIcon icon={FiBook} className="mr-3 text-primary-600" />
               Study Sections
-            </motion.h2>
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sections.map((section, index) => (
-                <motion.div
-                  key={section.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <StudySection section={section} />
-                </motion.div>
+              {sections.map((section) => (
+                <StudySection key={section.id} section={section} />
               ))}
             </div>
           </div>
