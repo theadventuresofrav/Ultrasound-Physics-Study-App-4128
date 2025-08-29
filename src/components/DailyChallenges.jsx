@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiTarget, FiClock, FiTrendingUp, FiZap, FiCheck } = FiIcons;
+const { FiTarget, FiClock, FiTrendingUp, FiZap, FiCheck, FiStar, FiAward } = FiIcons;
 
 const DAILY_CHALLENGES = [
   {
@@ -14,7 +14,8 @@ const DAILY_CHALLENGES = [
     icon: FiZap,
     target: 10,
     xp: 50,
-    type: 'correct_answers'
+    type: 'correct_answers',
+    color: 'from-yellow-500 to-orange-500'
   },
   {
     id: 'speed_round',
@@ -24,7 +25,8 @@ const DAILY_CHALLENGES = [
     target: 5,
     timeLimit: 120,
     xp: 75,
-    type: 'speed_challenge'
+    type: 'speed_challenge',
+    color: 'from-blue-500 to-cyan-500'
   },
   {
     id: 'section_focus',
@@ -33,7 +35,8 @@ const DAILY_CHALLENGES = [
     icon: FiTarget,
     target: 1,
     xp: 100,
-    type: 'section_complete'
+    type: 'section_complete',
+    color: 'from-green-500 to-emerald-500'
   },
   {
     id: 'accuracy_master',
@@ -43,7 +46,8 @@ const DAILY_CHALLENGES = [
     target: 20,
     accuracy: 80,
     xp: 125,
-    type: 'accuracy_challenge'
+    type: 'accuracy_challenge',
+    color: 'from-purple-500 to-pink-500'
   }
 ];
 
@@ -53,7 +57,7 @@ function DailyChallenges() {
   useEffect(() => {
     // Generate daily challenges if not already present
     const today = new Date().toDateString();
-    const existingChallenges = state.challenges.filter(c => 
+    const existingChallenges = state.challenges.filter(c =>
       new Date(c.date).toDateString() === today
     );
 
@@ -74,7 +78,7 @@ function DailyChallenges() {
     }
   }, [state.challenges, dispatch]);
 
-  const todayChallenges = state.challenges.filter(c => 
+  const todayChallenges = state.challenges.filter(c =>
     new Date(c.date).toDateString() === new Date().toDateString()
   );
 
@@ -97,18 +101,16 @@ function DailyChallenges() {
         case 'section_complete':
           const today = new Date().toDateString();
           const todayAnswers = state.progress.questionsAnswered.filter(id => {
-            // This is simplified - in a real app, you'd track timestamps
             return true; // Placeholder logic
           });
           currentProgress = todayAnswers.length >= 5 ? 1 : 0;
           break;
         case 'speed_challenge':
-          // This would need additional tracking of question times
           currentProgress = 0;
           break;
         case 'accuracy_challenge':
           const recent20 = state.progress.questionsAnswered.slice(-20);
-          const recent20Correct = state.progress.correctAnswers.filter(id => 
+          const recent20Correct = state.progress.correctAnswers.filter(id =>
             recent20.includes(id)
           );
           const accuracy = recent20.length > 0 ? (recent20Correct.length / recent20.length) * 100 : 0;
@@ -124,77 +126,141 @@ function DailyChallenges() {
     return null;
   }
 
+  const completedCount = todayChallenges.filter(c => c.completed).length;
+  const totalChallenges = todayChallenges.length;
+
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200">
+    <div className="glass-card rounded-3xl p-6 border-2 border-primary-200/50 bg-gradient-to-br from-primary-50 to-blue-50 shadow-xl">
+      {/* Enhanced Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-medical-900">Daily Challenges</h2>
-        <div className="text-sm text-medical-600">
-          {todayChallenges.filter(c => c.completed).length}/{todayChallenges.length} Complete
+        <div className="flex items-center space-x-3">
+          <div className="p-3 bg-gradient-to-r from-primary-500 to-blue-500 rounded-2xl shadow-lg">
+            <SafeIcon icon={FiStar} className="text-2xl text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Daily Challenges</h2>
+            <p className="text-sm text-gray-600">Complete challenges to earn XP</p>
+          </div>
+        </div>
+        <div className="bg-white/70 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/50 shadow-md">
+          <div className="text-sm font-medium text-gray-600">
+            {completedCount}/{totalChallenges} Complete
+          </div>
+          <div className="w-16 h-1 bg-gray-200 rounded-full mt-1">
+            <div 
+              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+              style={{ width: `${(completedCount / totalChallenges) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
+      {/* Enhanced Challenges */}
       <div className="space-y-4">
-        {todayChallenges.map((challenge) => {
-          const progressPercent = Math.min((challenge.progress / challenge.target) * 100, 100);
-          
-          return (
-            <motion.div
-              key={challenge.id}
-              whileHover={{ scale: 1.02 }}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                challenge.completed
-                  ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50'
-                  : 'border-medical-200 bg-white hover:border-primary-300'
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg ${
-                  challenge.completed 
-                    ? 'bg-green-100 text-green-600' 
-                    : 'bg-primary-100 text-primary-600'
-                }`}>
-                  {challenge.completed ? (
-                    <SafeIcon icon={FiCheck} className="text-xl" />
-                  ) : (
-                    <SafeIcon icon={challenge.icon} className="text-xl" />
-                  )}
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-medical-900">{challenge.title}</h3>
-                    <span className={`text-sm px-2 py-1 rounded-full ${
-                      challenge.completed
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-primary-100 text-primary-700'
-                    }`}>
-                      +{challenge.xp} XP
-                    </span>
+        <AnimatePresence>
+          {todayChallenges.map((challenge, index) => {
+            const progressPercent = Math.min((challenge.progress / challenge.target) * 100, 100);
+            const challengeData = DAILY_CHALLENGES.find(c => challenge.id.startsWith(c.id));
+            
+            return (
+              <motion.div
+                key={challenge.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                className={`relative overflow-hidden p-5 rounded-2xl border-2 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                  challenge.completed
+                    ? 'border-green-300 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50'
+                    : 'border-white/50 bg-white/70 backdrop-blur-sm hover:border-primary-300/50'
+                }`}
+              >
+                {/* Completion Celebration Effect */}
+                {challenge.completed && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 animate-pulse" />
+                )}
+
+                <div className="relative z-10 flex items-center space-x-4">
+                  {/* Enhanced Icon */}
+                  <div className={`p-4 rounded-2xl shadow-lg transition-all duration-300 ${
+                    challenge.completed
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white animate-bounce-gentle'
+                      : challengeData ? `bg-gradient-to-r ${challengeData.color} text-white` : 'bg-gradient-to-r from-primary-500 to-blue-500 text-white'
+                  }`}>
+                    <SafeIcon 
+                      icon={challenge.completed ? FiCheck : (challengeData?.icon || FiTarget)} 
+                      className="text-xl" 
+                    />
                   </div>
-                  
-                  <p className="text-sm text-medical-600 mb-3">{challenge.description}</p>
-                  
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-1 h-2 bg-medical-200 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progressPercent}%` }}
-                        className={`h-full rounded-full ${
-                          challenge.completed 
-                            ? 'bg-green-500' 
-                            : 'bg-primary-500'
+
+                  {/* Challenge Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-gray-900">{challenge.title}</h3>
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className={`px-3 py-1 rounded-full text-xs font-bold shadow-md ${
+                          challenge.completed
+                            ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white'
+                            : 'bg-gradient-to-r from-primary-400 to-blue-500 text-white'
                         }`}
-                      />
+                      >
+                        +{challenge.xp} XP
+                      </motion.span>
                     </div>
-                    <span className="text-sm text-medical-600 font-medium">
-                      {challenge.progress}/{challenge.target}
-                    </span>
+                    
+                    <p className="text-sm text-gray-600 mb-4 font-medium">{challenge.description}</p>
+                    
+                    {/* Enhanced Progress Bar */}
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progressPercent}%` }}
+                          transition={{ duration: 1.0, ease: "easeOut" }}
+                          className={`h-full rounded-full shadow-sm ${
+                            challenge.completed
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                              : challengeData ? `bg-gradient-to-r ${challengeData.color}` : 'bg-gradient-to-r from-primary-500 to-blue-500'
+                          }`}
+                        />
+                      </div>
+                      <span className="text-sm font-bold text-gray-700 min-w-0">
+                        {challenge.progress}/{challenge.target}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          );
-        })}
+
+                {/* Completion Badge */}
+                {challenge.completed && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    className="absolute top-3 right-3"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                      <SafeIcon icon={FiCheck} className="text-white text-sm" />
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Motivational Footer */}
+      <div className="mt-6 text-center">
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-md">
+          <p className="text-sm font-medium text-gray-700 mb-1">
+            🌟 Challenge yourself daily to accelerate your learning!
+          </p>
+          <p className="text-xs text-gray-600">
+            Complete all challenges to unlock bonus XP and achievements
+          </p>
+        </div>
       </div>
     </div>
   );

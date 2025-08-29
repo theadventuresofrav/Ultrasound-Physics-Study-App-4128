@@ -1,82 +1,35 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
+import {Link} from 'react-router-dom';
+import {motion} from 'framer-motion';
 import PhysicsCalculator from '../components/physics/PhysicsCalculator';
-import InteractiveBeamSimulator from '../components/physics/InteractiveBeamSimulator';
-import DopplerSimulator from '../components/physics/DopplerSimulator';
-import ArtifactSimulator from '../components/physics/ArtifactSimulator';
-import TransducerComparison from '../components/physics/TransducerComparison';
-import RealtimeQuizChallenge from '../components/physics/RealtimeQuizChallenge';
 import ScanOptimizer from '../components/physics/ScanOptimizer';
 import ArtifactAnalyzer from '../components/physics/ArtifactAnalyzer';
+import ScanTechniqueTool from '../components/physics/ScanTechniqueTool';
+import PhysicsLearningPath from '../components/physics/PhysicsLearningPath';
+import PhysicsPodcastPanel from '../components/physics/PhysicsPodcastPanel';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiTool, FiZap, FiTarget, FiActivity, FiRadio, FiAlertTriangle, FiCalculator, FiPlay } = FiIcons;
+const {FiArrowLeft, FiZap, FiTool} = FiIcons;
 
 function PhysicsTools() {
-  const [activeTab, setActiveTab] = useState('calculators');
-
-  const tools = {
-    calculators: {
-      name: 'Calculators & Simulators',
-      icon: FiCalculator,
-      color: 'from-blue-500 to-blue-600',
-      components: [
-        { component: PhysicsCalculator, title: 'Physics Calculator' },
-        { component: InteractiveBeamSimulator, title: 'Beam Simulator' }
-      ]
-    },
-    doppler: {
-      name: 'Doppler & Flow',
-      icon: FiActivity,
-      color: 'from-red-500 to-red-600',
-      components: [
-        { component: DopplerSimulator, title: 'Doppler Simulator' }
-      ]
-    },
-    artifacts: {
-      name: 'Artifacts & QA',
-      icon: FiAlertTriangle,
-      color: 'from-orange-500 to-orange-600',
-      components: [
-        { component: ArtifactSimulator, title: 'Artifact Simulator' },
-        { component: ArtifactAnalyzer, title: 'Artifact Analyzer' }
-      ]
-    },
-    transducers: {
-      name: 'Transducers',
-      icon: FiRadio,
-      color: 'from-green-500 to-green-600',
-      components: [
-        { component: TransducerComparison, title: 'Transducer Comparison' }
-      ]
-    },
-    optimization: {
-      name: 'Optimization',
-      icon: FiTarget,
-      color: 'from-purple-500 to-purple-600',
-      components: [
-        { component: ScanOptimizer, title: 'Scan Optimizer' }
-      ]
-    },
-    challenges: {
-      name: 'Interactive Challenges',
-      icon: FiPlay,
-      color: 'from-yellow-500 to-yellow-600',
-      components: [
-        { component: RealtimeQuizChallenge, title: 'Lightning Round' }
-      ]
-    }
-  };
-
-  const currentTool = tools[activeTab];
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
+      {/* Back Navigation */}
+      <div className="mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center space-x-2 text-primary-600 hover:text-primary-700"
+        >
+          <SafeIcon icon={FiArrowLeft} />
+          <span>Back to Dashboard</span>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-500 to-blue-600 rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between">
@@ -85,113 +38,96 @@ function PhysicsTools() {
               Interactive Physics Tools
             </h1>
             <p className="text-primary-100">
-              Master ultrasound physics with hands-on simulations and real-time feedback
+              Master ultrasound physics with interactive tools and visual learning
             </p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm text-primary-200">Interactive</p>
-              <p className="font-bold">Learning Experience</p>
+              <p className="font-bold">Learning Tools</p>
             </div>
             <SafeIcon icon={FiTool} className="text-4xl text-primary-200" />
           </div>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-medical-200">
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(tools).map(([key, tool]) => (
-            <motion.button
-              key={key}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveTab(key)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === key
-                  ? `bg-gradient-to-r ${tool.color} text-white shadow-lg`
-                  : 'bg-medical-100 text-medical-700 hover:bg-medical-200'
-              }`}
-            >
-              <SafeIcon icon={tool.icon} />
-              <span>{tool.name}</span>
-            </motion.button>
-          ))}
+      {/* Learning Path */}
+      <PhysicsLearningPath />
+
+      {/* Quick Physics Tips */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          {
+            title: 'Resolution vs Penetration',
+            tip: 'Higher frequencies improve resolution but reduce penetration depth. Find the optimal balance for your imaging needs.',
+            icon: FiZap
+          },
+          {
+            title: 'Focus Optimization',
+            tip: 'Position focal zone at or slightly below area of interest for optimal lateral resolution.',
+            icon: FiTool
+          },
+          {
+            title: 'Artifact Recognition',
+            tip: 'Understanding artifact physics helps distinguish pathology from imaging artifacts.',
+            icon: FiZap
+          }
+        ].map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white rounded-xl p-6 border border-medical-200 shadow-lg"
+          >
+            <div className="flex items-center space-x-3 mb-3">
+              <SafeIcon icon={item.icon} className="text-primary-600" />
+              <h3 className="font-bold text-medical-900">{item.title}</h3>
+            </div>
+            <p className="text-medical-700">{item.tip}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Main Tools Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-8">
+          <ScanTechniqueTool />
+          <PhysicsCalculator />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ScanOptimizer />
+            <ArtifactAnalyzer />
+          </div>
+        </div>
+
+        {/* Learning Resources Sidebar */}
+        <div className="xl:col-span-1">
+          <PhysicsPodcastPanel currentTopic="general" />
         </div>
       </div>
 
-      {/* Tool Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="space-y-8"
-        >
-          {currentTool.components.map(({ component: Component, title }, index) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Component />
-            </motion.div>
-          ))}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Learning Tips */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
-        <h2 className="text-xl font-bold text-medical-900 mb-4 flex items-center">
-          <SafeIcon icon={FiZap} className="mr-2 text-yellow-600" />
-          Interactive Learning Tips
-        </h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-medical-900 mb-2">Maximize Your Learning</h3>
-            <ul className="text-sm text-medical-700 space-y-1">
-              <li>• Experiment with different parameter combinations</li>
-              <li>• Watch how changes affect multiple variables simultaneously</li>
-              <li>• Use audio feedback in Doppler simulator for better understanding</li>
-              <li>• Practice with real clinical scenarios using presets</li>
-            </ul>
+      {/* Study Resources Call-to-Action */}
+      <div className="bg-gradient-to-r from-blue-50 to-primary-50 rounded-2xl p-6 border border-primary-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+              <SafeIcon icon={FiTool} className="text-2xl text-primary-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-medical-900">Master Physics Concepts</h3>
+              <p className="text-medical-600">
+                Use interactive tools and practice questions to deepen your understanding
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-medical-900 mb-2">Pro Tips</h3>
-            <ul className="text-sm text-medical-700 space-y-1">
-              <li>• Save interesting calculations for later review</li>
-              <li>• Compare multiple transducers to understand trade-offs</li>
-              <li>• Use artifact simulators to recognize patterns</li>
-              <li>• Challenge yourself with the lightning round for speed</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-medical-200">
-        <h2 className="text-xl font-bold text-medical-900 mb-4">Your Interactive Learning Stats</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: 'Tools Used', value: '6/6', icon: FiTool, color: 'text-blue-600' },
-            { label: 'Calculations', value: '47', icon: FiCalculator, color: 'text-green-600' },
-            { label: 'Simulations', value: '23', icon: FiZap, color: 'text-purple-600' },
-            { label: 'Challenge Score', value: '1,250', icon: FiTarget, color: 'text-orange-600' }
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="text-center p-4 bg-medical-50 rounded-lg"
+          <div className="flex space-x-3">
+            <Link
+              to="/quiz/practice"
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
             >
-              <SafeIcon icon={stat.icon} className={`text-2xl ${stat.color} mx-auto mb-2`} />
-              <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs text-medical-600">{stat.label}</div>
-            </motion.div>
-          ))}
+              Practice Quiz
+            </Link>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -4,7 +4,7 @@ import { useStudy } from '../context/StudyContext';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiFire, FiCalendar } = FiIcons;
+const { FiFire, FiCalendar, FiTrendingUp, FiTarget } = FiIcons;
 
 function StudyStreak() {
   const { state } = useStudy();
@@ -21,69 +21,105 @@ function StudyStreak() {
     };
   });
 
-  // Mock current streak - in real app, calculate from actual data
-  const currentStreak = 5;
-  const streakGoal = 7;
+  const currentStreak = 7; // Mock current streak
+  const streakGoal = 14;
+  const longestStreak = 12;
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-6 border border-orange-200">
-      <div className="flex items-center justify-between mb-4">
+    <div className="glass-card rounded-3xl p-6 border-2 border-orange-200/50 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 shadow-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-orange-100 rounded-lg">
-            <SafeIcon icon={FiFire} className="text-2xl text-orange-600" />
+          <div className="p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-lg animate-glow">
+            <SafeIcon icon={FiFire} className="text-2xl text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-medical-900">Study Streak</h3>
-            <p className="text-sm text-medical-600">Keep the momentum going!</p>
+            <h3 className="text-xl font-bold text-gray-900">Study Streak</h3>
+            <p className="text-sm text-gray-600">Keep the momentum going! 🔥</p>
           </div>
         </div>
-        
         <div className="text-right">
-          <div className="text-3xl font-bold text-orange-600">{currentStreak}</div>
-          <div className="text-sm text-medical-600">days</div>
+          <div className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+            {currentStreak}
+          </div>
+          <div className="text-sm text-gray-600 font-medium">days</div>
         </div>
       </div>
 
-      {/* Streak Progress */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between text-sm text-medical-600 mb-2">
-          <span>Goal: {streakGoal} days</span>
-          <span>{currentStreak}/{streakGoal}</span>
+      {/* Streak Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-md">
+          <div className="flex items-center space-x-2 mb-2">
+            <SafeIcon icon={FiTarget} className="text-orange-600" />
+            <span className="text-sm font-medium text-gray-700">Current Goal</span>
+          </div>
+          <div className="text-lg font-bold text-gray-900">{streakGoal} days</div>
         </div>
-        <div className="h-2 bg-white rounded-full overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-md">
+          <div className="flex items-center space-x-2 mb-2">
+            <SafeIcon icon={FiTrendingUp} className="text-orange-600" />
+            <span className="text-sm font-medium text-gray-700">Best Streak</span>
+          </div>
+          <div className="text-lg font-bold text-gray-900">{longestStreak} days</div>
+        </div>
+      </div>
+
+      {/* Enhanced Streak Progress */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <span className="font-medium">Goal Progress</span>
+          <span className="font-bold text-gray-900">{currentStreak}/{streakGoal}</span>
+        </div>
+        <div className="progress-bar">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${(currentStreak / streakGoal) * 100}%` }}
-            className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-full shadow-lg"
           />
         </div>
       </div>
 
-      {/* Weekly Calendar */}
-      <div className="grid grid-cols-7 gap-2">
-        {last7Days.map((day, index) => (
-          <div key={day.date} className="text-center">
-            <div className="text-xs text-medical-600 mb-1">{day.day}</div>
+      {/* Enhanced Weekly Calendar */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+          <SafeIcon icon={FiCalendar} className="mr-2 text-orange-600" />
+          This Week
+        </h4>
+        <div className="grid grid-cols-7 gap-2">
+          {last7Days.map((day, index) => (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              key={day.date}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.1 }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                day.studied
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white border-2 border-medical-200 text-medical-400'
-              }`}
+              className="text-center"
             >
-              {day.studied ? '🔥' : '○'}
+              <div className="text-xs font-medium text-gray-600 mb-2">{day.day}</div>
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-md hover:shadow-lg ${
+                  day.studied
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white scale-110 animate-glow'
+                    : 'bg-white border-2 border-gray-200 text-gray-400 hover:border-gray-300'
+                }`}
+              >
+                {day.studied ? '🔥' : '○'}
+              </div>
             </motion.div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4 text-center">
-        <p className="text-sm text-medical-600">
-          Study today to keep your streak alive! 🎯
-        </p>
+      {/* Motivational Message */}
+      <div className="text-center">
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-md">
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            🎯 You're doing amazing!
+          </p>
+          <p className="text-xs text-gray-600">
+            Study today to extend your streak to {currentStreak + 1} days
+          </p>
+        </div>
       </div>
     </div>
   );
