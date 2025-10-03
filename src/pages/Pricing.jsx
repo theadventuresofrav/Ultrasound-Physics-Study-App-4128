@@ -27,10 +27,10 @@ function Pricing() {
     {
       name: "Sonography School 2025 (SPI)",
       amount: 26,
-      priceId: "price_1Rn3NR2qjHpUO0Y1D23OVozB",
-      paymentLink: "https://buy.stripe.com/5kQcMY06Oc0sdyy5ZoabK01",
+      priceId: "prod_SiUGNwBgh7wMdH",
+      paymentLink: "https://buy.stripe.com/fZuaEQ9Ho2pScuuafEabK00",
       currency: "usd",
-      interval: "month"
+      interval: "1 PAYMENT - LIFETIME DEAL"
     }
   ];
 
